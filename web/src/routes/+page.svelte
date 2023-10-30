@@ -12,7 +12,7 @@
 	const mode = writable(MODE.JOIN);
 </script>
 
-<section class="w-screen min-h-screen flex flex-col p-4">
+<section class="w-screen min-h-screen grid justify-items-center p-4">
 	<div class="m-auto grid gap-5 justify-items-center">
 		<h1 class="title text-5xl pb-10">🖥️ Mintoro</h1>
 		{#if $videoElement?.srcObject == null}
@@ -50,7 +50,7 @@
 		{/if}
 	</div>
 
-	<video bind:this={$videoElement} autoplay controls style="display: none;">
+	<video id="screen-share" bind:this={$videoElement} autoplay controls style="display: none;">
 		<track kind="captions" />
 	</video>
 </section>
@@ -61,5 +61,10 @@
 		background: -webkit-linear-gradient(#5900be, #3700b6);
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
+	}
+
+	#screen-share {
+		max-width: 80%;
+		max-height: 80%;
 	}
 </style>
