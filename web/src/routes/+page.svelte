@@ -14,7 +14,7 @@
 
 <section class="w-screen min-h-screen flex flex-col p-4">
 	<div class="m-auto grid gap-5 justify-items-center">
-		<h1 class="title text-5xl pb-10">🖥️ Monitoro</h1>
+		<h1 class="title text-5xl pb-10">🖥️ Mintoro</h1>
 		{#if $videoElement?.srcObject == null}
 			{#if $mode == MODE.HOST}
 				<button
