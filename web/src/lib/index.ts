@@ -1,9 +1,14 @@
-export async function host(): Promise<string> {
+/**
+ * Returns an ID to join the host stream
+ * @returns ID of the stream hoster
+ */
+export async function hostStream(): Promise<string> {
     const peerjs = await import('peerjs');
     const [adjective1, adjective2] = await (await fetch("https://random-word-form.repl.co/random/adjective?count=2")).json()
     const [animal] = (await (await fetch("https://random-word-form.repl.co/random/animal")).json()) as string[];
+    const id = `${adjective1}-${adjective2}-${animal}`.toLowerCase();
 
-    const self = new peerjs.Peer(`${adjective1}-${adjective2}-${animal}`.toLowerCase());
+    const self = new peerjs.Peer(id);
 
     self.on('connection', async (conn) => {
         // confirmation
@@ -16,7 +21,12 @@ export async function host(): Promise<string> {
     });
 }
 
-export async function connect(peerId: string): Promise<MediaStream> {
+/**
+ * Requests a host ID for the stream data
+ * @param peerId id of the host to watch a stream for
+ * @returns the {MediaStream}
+ */
+export async function requestStream(peerId: string): Promise<MediaStream> {
     const peerjs = await import('peerjs');
     const self = new peerjs.Peer();
 
