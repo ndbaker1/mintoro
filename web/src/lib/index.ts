@@ -1,11 +1,13 @@
+import { getAdjectives, getAnimal } from './assets';
+
 /**
  * Returns an ID to join the host stream
  * @returns ID of the stream hoster
  */
 export async function hostStream(): Promise<string> {
     const peerjs = await import('peerjs');
-    const [adjective1, adjective2] = await (await fetch("https://random-word-form.repl.co/random/adjective?count=2")).json()
-    const [animal] = (await (await fetch("https://random-word-form.repl.co/random/animal")).json()) as string[];
+    const [adjective1, adjective2] = getAdjectives(2);
+    const animal = getAnimal()
     const id = `${adjective1}-${adjective2}-${animal}`.toLowerCase();
 
     const self = new peerjs.Peer(id);
