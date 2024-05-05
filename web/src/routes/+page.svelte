@@ -1,8 +1,9 @@
-<script lang="ts">
+<script>
 	import { requestStream, hostStream } from '$lib';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { toCanvas } from 'qrcode';
+	import { pushState, replaceState } from '$app/navigation';
 
 	/**
 	 * k-v pairs used to setup the app
@@ -11,23 +12,30 @@
 		ID: 'id'
 	};
 
-	enum MODE {
-		HOST,
-		JOINING,
-		JOINED,
-		IDLE
-	}
+	const PageState = {
+		HOST: 0,
+		JOINING: 1,
+		JOINED: 2,
+		IDLE: 3
+	};
 
 	const id = writable('');
-	const stream = writable<MediaStream>();
-	const mode = writable(MODE.IDLE);
+	/** @type {import('svelte/store').Writable<MediaStream>} */
+	const stream = writable();
+	const mode = writable(PageState.IDLE);
 
 	class Node {
-		static setupQRCode(canvas: HTMLCanvasElement) {
+		/**
+		 * @param canvas {HTMLCanvasElement}
+		 */
+		static setupQRCode(canvas) {
 			toCanvas(canvas, `${window.location.origin}?${PARAM_KEYS.ID}=${$id}`, console.error);
 		}
 
-		static setupVideo(video: HTMLVideoElement) {
+		/**
+		 * @param video {HTMLVideoElement}
+		 */
+		static setupVideo(video) {
 			video.srcObject = $stream;
 			video.style.display = 'block';
 		}
@@ -36,26 +44,29 @@
 	class System {
 		static async host() {
 			$id = await hostStream();
-			$mode = MODE.HOST;
+			$mode = PageState.HOST;
 
 			const url = new URL(window.location.href);
 			url.searchParams.set(PARAM_KEYS.ID, $id);
-			window.history.replaceState(null, 'Mintoro', url);
+			replaceState(url, 'Mintoro');
 		}
 
-		static async request(id: string) {
+		/**
+		 * @param id {string}
+		 */
+		static async request(id) {
 			const url = new URL(window.location.href);
 			url.searchParams.delete(PARAM_KEYS.ID);
-			window.history.pushState(null, 'Mintoro', url);
+			pushState(url, 'Mintoro');
 
-			$mode = MODE.JOINING;
+			$mode = PageState.JOINING;
 			$stream = await requestStream(id);
-			$mode = MODE.JOINED;
+			$mode = PageState.JOINED;
 		}
 
 		static reset() {
 			$id = '';
-			$mode = MODE.IDLE;
+			$mode = PageState.IDLE;
 		}
 	}
 
@@ -69,16 +80,16 @@
 <section class="w-screen min-h-screen grid justify-items-center p-4">
 	<div class="m-auto grid gap-5 justify-items-center">
 		<h1 class="title text-5xl pb-10">🖥️ Mintoro</h1>
-		{#if $mode == MODE.HOST}
+		{#if $mode == PageState.HOST}
 			<canvas id="qrcode" use:Node.setupQRCode />
 			<button class="btn btn-wide"> {$id} </button>
 			<button class="btn btn-wide btn-secondary" on:click={System.reset}> Back </button>
-		{:else if $mode == MODE.JOINED}
+		{:else if $mode == PageState.JOINED}
 			<video id="screen-share" autoplay controls use:Node.setupVideo>
 				<track kind="captions" />
 			</video>
 			<button class="btn btn-wide btn-secondary" on:click={System.reset}> Back </button>
-		{:else if $mode == MODE.JOINING}
+		{:else if $mode == PageState.JOINING}
 			<pre class="text-center">requesting stream from <br /><strong>{$id}</strong></pre>
 			<svg width="200">
 				<image
@@ -86,7 +97,7 @@
 				/>
 			</svg>
 			<button class="btn btn-wide btn-secondary" on:click={System.reset}> Back </button>
-		{:else if $mode == MODE.IDLE}
+		{:else if $mode == PageState.IDLE}
 			<form on:submit={() => System.request($id)} class="w-full">
 				<input
 					type="text"

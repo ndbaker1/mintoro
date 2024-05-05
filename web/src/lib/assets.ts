@@ -207,7 +207,7 @@ export const getAnimal = (): string =>
 			'zebra'
 		],
 		1
-	);
+	)[0];
 
 export const getAdjectives = (n: number): string[] =>
 	sampleSize(
