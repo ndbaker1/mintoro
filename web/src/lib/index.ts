@@ -5,22 +5,22 @@ import { getAdjectives, getAnimal } from './assets';
  * @returns ID of the stream hoster
  */
 export async function hostStream(): Promise<string> {
-    const peerjs = await import('peerjs');
-    const [adjective1, adjective2] = getAdjectives(2);
-    const animal = getAnimal()
-    const id = `${adjective1}-${adjective2}-${animal}`.toLowerCase();
+	const peerjs = await import('peerjs');
+	const [adjective1, adjective2] = getAdjectives(2);
+	const animal = getAnimal();
+	const id = `${adjective1}-${adjective2}-${animal}`.toLowerCase();
 
-    const self = new peerjs.Peer(id);
+	const self = new peerjs.Peer(id);
 
-    self.on('connection', async (conn) => {
-        // confirmation
-        const media = await navigator.mediaDevices.getDisplayMedia({ audio: false, video: true });
-        self.call(conn.peer, media);
-    });
+	self.on('connection', async (conn) => {
+		// confirmation
+		const media = await navigator.mediaDevices.getDisplayMedia({ audio: false, video: true });
+		self.call(conn.peer, media);
+	});
 
-    return new Promise((resolve, _) => {
-        self.on('open', resolve);
-    });
+	return new Promise((resolve, _) => {
+		self.on('open', resolve);
+	});
 }
 
 /**
@@ -29,16 +29,16 @@ export async function hostStream(): Promise<string> {
  * @returns the {MediaStream}
  */
 export async function requestStream(peerId: string): Promise<MediaStream> {
-    const peerjs = await import('peerjs');
-    const self = new peerjs.Peer();
+	const peerjs = await import('peerjs');
+	const self = new peerjs.Peer();
 
-    return new Promise((resolve, _) => {
-        self.on('open', (_) => {
-            self.connect(peerId.toLowerCase());
-            self.on('call', (media) => {
-                media.on('stream', resolve);
-                media.answer();
-            });
-        });
-    });
+	return new Promise((resolve, _) => {
+		self.on('open', (_) => {
+			self.connect(peerId.toLowerCase());
+			self.on('call', (media) => {
+				media.on('stream', resolve);
+				media.answer();
+			});
+		});
+	});
 }
